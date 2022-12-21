@@ -52,7 +52,7 @@ class SettingsController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = ['index', 'check', 'delete', 'save', 'deactivation', 'message', 'oauthsettings', 'oauthattribute', 'samlprovider', 'samlsettings', 'samlattribute', 'customsettings'];
+    protected array|int|bool $allowAnonymous = ['index', 'check', 'delete', 'save', 'deactivation', 'message', 'oauthsettings', 'oauthattribute', 'samlprovider', 'samlsettings', 'samlattribute', 'customsettings'];
 
     // Public Methods
     // =========================================================================
@@ -100,7 +100,7 @@ class SettingsController extends Controller
         if(isset($user_info[0]["admin"]) && $user_info[0]["admin"] == 1 ){
             exit('No Email Address Return!');
         }
-        
+
         if(isset($user_info[0])){
             $var = Craft::$app->getElements()->deleteElement($user_info[0], false);
             exit($var);
@@ -110,7 +110,7 @@ class SettingsController extends Controller
     }
 
     public function actionProviders(): Response
-    {   
+    {
         $settings = (ResourcesController::actionDatadb() != null)?ResourcesController::actionDatadb():Craftsinglesignon::$plugin->getSettings();
 
         return $this->renderTemplate('craft-single-sign-on/events/customprovider', [
@@ -119,9 +119,9 @@ class SettingsController extends Controller
     }
 
     public function actionOauthsettings(): Response
-    {   
+    {
         $settings = (ResourcesController::actionDatadb('oauthsettings') != null)?ResourcesController::actionDatadb('oauthsettings'):Craftsinglesignon::$plugin->getSettings();
-        
+
         if(Craft::$app->request->getQueryParam('events') == "delete"){
 
             ResourcesController::actionDatadelete('oauthsettings');
@@ -138,14 +138,14 @@ class SettingsController extends Controller
     public function actionOauthattribute(): Response
     {
         $attribute = (ResourcesController::actionDatadb('oauthattribute') != null)?ResourcesController::actionDatadb('oauthattribute'):Craftsinglesignon::$plugin->getSettings();
-        
+
         return $this->renderTemplate('craft-single-sign-on/events/oauthattribute', array(
             'oauthattribute' => $attribute,
         ));
     }
 
     public function actionSamlsettings(): Response
-    {   
+    {
         $settings = (ResourcesController::actionDatadb('samlsettings') != null)?ResourcesController::actionDatadb('samlsettings'):Craftsinglesignon::$plugin->getSettings();
 
         if(Craft::$app->request->getQueryParam('events') == "delete"){
@@ -164,7 +164,7 @@ class SettingsController extends Controller
     public function actionSamlattribute(): Response
     {
         $attribute = (ResourcesController::actionDatadb('samlattribute') != null)?ResourcesController::actionDatadb('samlattribute'):Craftsinglesignon::$plugin->getSettings();
-        
+
         return $this->renderTemplate('craft-single-sign-on/events/samlattribute', array(
             'samlattribute' => $attribute,
         ));
@@ -175,7 +175,7 @@ class SettingsController extends Controller
         $attribute = (ResourcesController::actionDatadb('samlprovider') != null)?ResourcesController::actionDatadb('samlprovider'):Craftsinglesignon::$plugin->getSettings();
         $site_url = Craft::$app->sites->primarySite->baseUrl;
         $attribute->provider_meta_data = '<?xml version="1.0"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="'.$site_url.'"><md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true"><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="'.$site_url.'/'.$attribute->provider_logout_url.'"/><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="'.$site_url.'/'.$attribute->provider_logout_url.'"/><md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="'.$site_url.'/'.$attribute->provider_login_url.'" index="1"/></md:SPSSODescriptor></md:EntityDescriptor>';
-   
+
         return $this->renderTemplate('craft-single-sign-on/events/samlprovider', array(
             'samlprovider' => $attribute,
         ));
@@ -184,7 +184,7 @@ class SettingsController extends Controller
     public function actionCustomsettings(): Response
     {
         $attribute = (ResourcesController::actionDatadb('customsettings') != null)?ResourcesController::actionDatadb('customsettings'):Craftsinglesignon::$plugin->getSettings();
-        
+
         return $this->renderTemplate('craft-single-sign-on/events/customsettings', array(
             'customsettings' => $attribute,
         ));
@@ -253,11 +253,10 @@ class SettingsController extends Controller
             $details['userRole'] = $this->request->getBodyParam('userRole');
             $settings['customsettings'] = $details;
         }
-        
+
         // Insert query
-        $prefix = (Craft::$app->version>4)?getenv('CRAFT_DB_TABLE_PREFIX'):getenv('DB_TABLE_PREFIX');
         Craft::$app->db->createCommand()
-        ->upsert($prefix.'mologin_config', array(
+        ->upsert('{{%mologin_config}}', array(
             'id' => 1,
             'name' => $site_name,
             'options' => json_encode($settings),
@@ -288,7 +287,7 @@ class SettingsController extends Controller
                     background-color: rgb(0,0,0); /* Fallback color */
                     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
                 }
-                
+
                 /* Modal Content */
                 .modal-content {
                     position: relative;
@@ -305,10 +304,10 @@ class SettingsController extends Controller
                     animation-name: animatetop;
                     animation-duration: 0.4s
                 }
-                
+
                 .modal-header .modal-footer .modal-body {
                     padding: 2px 16px;
-                } 
+                }
 
                 .save {
                     position: absolute;
@@ -361,7 +360,7 @@ class SettingsController extends Controller
                         }
                     });
                 }
-            </script>'; 
+            </script>';
 
             $cookie_name = "mo_feedback";
             $cookie_value = "submitted";
@@ -372,10 +371,10 @@ class SettingsController extends Controller
             } else {
                 return 1;
             }
-            
+
     }
 
-    public function actionMessage() 
+    public function actionMessage()
     {
         $plugin = Craft::$app->plugins->getPlugin('craft-single-sign-on', false);
         $user_info = User::find()->admin()->one();
@@ -397,7 +396,7 @@ class SettingsController extends Controller
                                 <br><br>Version : '.$plugin->version.'
                                 <br><br>Query : '.$query_sub.'
                                 <br><br>Feedback : '.$feedback.'</div>';
-                                
+
         $fields = array(
             'customerKey'	=> $customerKey,
             'sendEmail' 	=> true,
@@ -412,11 +411,11 @@ class SettingsController extends Controller
                 'content' 		=> $content
             ),
         );
-        
+
         $stringToHash = $customerKey .  $currentTimeInMillis . $apiKey;
         $hashValue = hash("sha512", $stringToHash);
         $field_string = json_encode($fields);
-        
+
         $ch = curl_init('https://login.xecurify.com/moas/api/notify/send');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
@@ -428,7 +427,7 @@ class SettingsController extends Controller
             "Timestamp: ".$currentTimeInMillis,
             "Authorization: ".$hashValue
             )
-        ); 
+        );
         curl_exec($ch);
         curl_close($ch);
         return 1;

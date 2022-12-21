@@ -74,21 +74,21 @@ class Craftsinglesignon extends Plugin
      *
      * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public string $schemaVersion = '1.0.0';
 
     /**
      * Set to `true` if the plugin should have a settings view in the control panel.
      *
      * @var bool
      */
-    public $hasCpSettings = true;
+    public bool $hasCpSettings = true;
 
     /**
      * Set to `true` if the plugin should have its own section (main nav item) in the control panel.
      *
      * @var bool
      */
-    public $hasCpSection = true;
+    public bool $hasCpSection = true;
 
     // Public Methods
     // =========================================================================
@@ -138,7 +138,7 @@ class Craftsinglesignon extends Plugin
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             [self::class, 'onRegisterCpUrlRules'],
             function (RegisterUrlRulesEvent $event) {
-                
+
             }
         );
 
@@ -186,7 +186,7 @@ class Craftsinglesignon extends Plugin
             Plugins::EVENT_AFTER_INSTALL_PLUGIN,
             function (PluginEvent $event) {
                 if ($event->plugin === $this) {
-                    
+
                 }
             }
         );
@@ -265,7 +265,7 @@ class Craftsinglesignon extends Plugin
     public static function onRegisterCpUrlRules(RegisterUrlRulesEvent $event)
     {
         if(Craft::$app->getUser()->getIdentity()==null){
-            
+
             if (\Craft::$app->getIsLive()) {
                 $event->rules = array_merge(
                     $event->rules,
@@ -290,7 +290,7 @@ class Craftsinglesignon extends Plugin
     public function getCpNavItem(): ?array
     {
         $item = parent::getCpNavItem();
-        $item['badgeCount'] = 5;
+        // $item['badgeCount'] = 5;
         $item['subnav'] = [
             'custom_provider' => ['label' => 'Providers', 'url' => 'craft-single-sign-on'],
             'custom_settings' => ['label' => 'Settings', 'url' => 'craft-single-sign-on/custom-settings'],
@@ -299,7 +299,7 @@ class Craftsinglesignon extends Plugin
     }
 
     public function getNotify($event)
-    { 
+    {
         Craft::$app->runAction('craft-single-sign-on/settings/deactivation');
     }
 

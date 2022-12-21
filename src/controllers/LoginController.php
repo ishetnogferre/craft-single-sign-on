@@ -49,7 +49,7 @@ class LoginController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = ['index', 'callback', 'test_config', 'saml', 'samllogin', 'json_to_htmltable'];
+    protected array|int|bool $allowAnonymous = ['index', 'callback', 'test_config', 'saml', 'samllogin', 'json_to_htmltable'];
 
     // Public Methods
     // =========================================================================
@@ -73,10 +73,9 @@ class LoginController extends Controller
         if(isset($_GET['test_config'])){
             $alldata['test_config'] = 1;
             $site_name = Craft::$app->sites->currentSite->name;
-            $prefix = (Craft::$app->version>4)?getenv('CRAFT_DB_TABLE_PREFIX'):getenv('DB_TABLE_PREFIX');
-            Craft::$app->db->createCommand()->update($prefix.'mologin_config', ['options' => json_encode($alldata)], ['name' => $site_name])->execute();
+            Craft::$app->db->createCommand()->update('{{%mologin_config}}', ['options' => json_encode($alldata)], ['name' => $site_name])->execute();
         }
-        
+
         if(!isset($_REQUEST['code'])){
             $login_dialog_url = $authorization_url.'?redirect_uri=' .$callback_url .'&response_type=code&client_id=' .$client_id .'&scope='.$scope.'&state='.$state;
             header('Location:'. $login_dialog_url);
@@ -118,7 +117,7 @@ class LoginController extends Controller
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, 'redirect_uri='.urlencode($callback_url).'&grant_type='.$grant_type.'&client_id='.$client_id.'&client_secret='.$client_secret.'&code='.$code);
 		$content = curl_exec($ch);
-		
+
                 if(curl_error($ch)){
 		        exit( curl_error($ch) );
 		}
@@ -128,7 +127,7 @@ class LoginController extends Controller
         } else if(!is_array(json_decode($content, true))){
 			exit("Invalid response received getting access_token from url ".$oauth_token_api);
 		}
-		
+
 		$content = json_decode($content,true);
 		if(isset($content["error_description"])){
 			exit($content["error_description"]);
@@ -141,7 +140,7 @@ class LoginController extends Controller
 		}
 
         if(isset($access_token)){
-    
+
             $ch = curl_init($user_info_api . '?access_token=' . $access_token);
 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -154,14 +153,14 @@ class LoginController extends Controller
             if(curl_error($ch)){
                 exit( curl_error($ch) );
             }
-    
+
             if(!is_array(json_decode($json, true))){
                 exit("Invalid response received getting access_token from url ".$user_info_api);
             }
 
             $profile_json_output = json_decode($json, true);
             curl_close($ch);
-            
+
             if(isset($profile_json_output["error_description"])){
                 exit($profile_json_output["error_description"]);
             } else if(isset($profile_json_output["error"])){
@@ -173,12 +172,11 @@ class LoginController extends Controller
                 exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
             }
         }
-                
+
         if(isset($alldata['test_config'])){
             $alldata['test_config'] = null;
             $site_name = Craft::$app->sites->currentSite->name;
-            $prefix = (Craft::$app->version>4)?getenv('CRAFT_DB_TABLE_PREFIX'):getenv('DB_TABLE_PREFIX');
-            Craft::$app->db->createCommand()->update($prefix.'mologin_config', ['options' => json_encode($alldata)], ['name' => $site_name])->execute();
+            Craft::$app->db->createCommand()->update('{{%mologin_config}}', ['options' => json_encode($alldata)], ['name' => $site_name])->execute();
             self::actionTest_config($profile_json_output);
         }
 
@@ -192,16 +190,16 @@ class LoginController extends Controller
         $user_info = User::find()->email($email)->all();
         $groupmap = @$alldata['customsettings'] ?: null;
         $noreg = @$alldata['oauthsettings']['noreg'] ?: null;
-        
+
         if(isset($user_info[0]["admin"]) && $user_info[0]["admin"] == 1 ){
             exit('No Email Address Return!');
         }
-        
+
         if(empty($user_info)){
-            
+
             if(Craft::$app->getUser()->getIdentity())
                 return;
-            
+
             SettingsController::actionCakdd($noreg, $user_info);
             $user->username = $user_name;
             $user->email = $email;
@@ -209,7 +207,7 @@ class LoginController extends Controller
             $user->slug = 'mologin';
 
             if ($user->validate(null, false)) {
-                
+
                 Craft::$app->getElements()->saveElement($user, false);
 
                 if(isset($groupmap['grouphandle'])){
@@ -225,12 +223,12 @@ class LoginController extends Controller
         }
 
         $user_info = User::find()->email($email)->all();
-        
+
         if(isset($user_info)){
             Craft::$app->getUser()->login($user_info[0]);
             $redirect_url = @$groupmap['redirect_url'] ?: UrlHelper::cpUrl('dashboard');
             Craft::$app->getResponse()->redirect($redirect_url);
-        }else{ 
+        }else{
             exit("Error in login!");
         }
 
@@ -243,7 +241,7 @@ class LoginController extends Controller
         echo $print;
         exit();
     }
-    
+
     public static function actionJson_to_htmltable($arr) {
 
         $str = "<table>";

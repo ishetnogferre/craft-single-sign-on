@@ -53,7 +53,7 @@ class MethodController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = ['xhjsdop', 'saml', 'samllogin', 'validSignature'];
+    protected array|int|bool $allowAnonymous = ['xhjsdop', 'saml', 'samllogin', 'validSignature'];
 
     // Public Methods
     // =========================================================================
@@ -102,14 +102,14 @@ class MethodController extends Controller
         $firstname_attribute = isset($attr['firstname_attribute'])?$attr['firstname_attribute']:"";
         $lastname_attribute = isset($attr['lastname_attribute'])?$attr['lastname_attribute']:"";
         $noreg = isset($data['noreg'])?$data['noreg']:"";
-        
+
         if(array_key_exists('SAMLResponse', $_REQUEST) && !empty($_REQUEST['SAMLResponse'])) {
-            
+
             $samlResponse = $_POST["SAMLResponse"];
             $samlResponse = htmlspecialchars($samlResponse);
             $samlResponse = base64_decode($samlResponse);
             $state = $_POST["RelayState"];
-            
+
             if(array_key_exists('SAMLResponse', $_GET) && !empty($_GET['SAMLResponse'])) {
                 $samlResponse = gzinflate($samlResponse);
             }
@@ -127,7 +127,7 @@ class MethodController extends Controller
         $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
 
         foreach ($xpath->query('/samlp:Response/saml:Assertion/saml:AttributeStatement/saml:Attribute', $doc) as $attr) {
-            
+
             foreach ($xpath->query('saml:AttributeValue', $attr) as $value) {
 
                 $profile_output[$attr->getAttribute('Name')] = $value->textContent;
@@ -145,7 +145,7 @@ class MethodController extends Controller
         }
 
         self::actionvalidSignature($data, $samlResponseXml);
-        
+
         if($state == 'test_config'){
             LoginController::actionTest_config($profile_output);
         }
@@ -155,9 +155,9 @@ class MethodController extends Controller
         if(isset($user_info[0]["admin"]) && $user_info[0]["admin"] == 1 ){
             exit('No Email Address Return!');
         }
-        
+
         if(empty($user_info)){
-            
+
             SettingsController::actionCakdd($noreg, $user_info);
             $user->username = $firstname;
             $user->email = $email;
@@ -165,7 +165,7 @@ class MethodController extends Controller
             $user->slug = 'mologin';
 
             if ($user->validate(null, false)) {
-                
+
                 Craft::$app->getElements()->saveElement($user, false);
 
                 if(isset($groupmap['grouphandle'])){
@@ -183,7 +183,7 @@ class MethodController extends Controller
         $user_info = User::find()->email($email)->all();
 
         if(isset($user_info)){
-            Craft::$app->getUser()->login($user_info[0]); 
+            Craft::$app->getUser()->login($user_info[0]);
             $redirect_url = isset($groupmap['redirect_url'])?$groupmap['redirect_url']:UrlHelper::cpUrl('dashboard');
             $this->redirect($redirect_url);
         }else{
