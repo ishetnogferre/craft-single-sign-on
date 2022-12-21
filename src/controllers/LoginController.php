@@ -16,6 +16,7 @@ use craft\elements\User;
 use miniorangedev\craftsinglesignon\controllers\ResourcesController;
 
 use Craft;
+use craft\helpers\App;
 use craft\web\Controller;
 
 /**
@@ -64,7 +65,7 @@ class LoginController extends Controller
     {
         $alldata = ResourcesController::actionDatadb();
         $data = @$alldata['oauthsettings'] ?: null;
-        $client_id = @$data['client_id'] ?: null;
+        $client_id = App::parseEnv(@$data['client_id']) ?: null;
         $scope = @$data['scope'] ?: null;
         $authorization_url = @$data['authorization_url'] ?: null;
         $state = @$data['app_provider'] ?: null;
@@ -96,8 +97,8 @@ class LoginController extends Controller
         $alldata = (ResourcesController::actionDatadb() != null)?ResourcesController::actionDatadb():array();
         $data = @$alldata['oauthsettings'] ?: null;
         $attr = @$alldata['oauthattribute'] ?: null;
-        $client_id = @$data['client_id'] ?: null;
-        $client_secret = @$data['client_secret'] ?: null;
+        $client_id = App::parseEnv(@$data['client_id']) ?: null;
+        $client_secret = App::parseEnv(@$data['client_secret']) ?: null;
         $oauth_token_api = @$data['oauth_token_api'] ?: null;
         $user_info_api = @$data['user_info_api'] ?: null;
         $username_attribute = @$attr['username_attribute'] ?: null;

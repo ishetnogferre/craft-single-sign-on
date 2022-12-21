@@ -25,20 +25,22 @@
             placeholder: 'App Name',
             value: oauthsettings['app_provider'] ?? ""})
         }}
-        {{ forms.textField({
+        {{ forms.autosuggestField({
             label: 'Client ID',
             instructions: '',
             id: 'client_id',
             name: 'client_id',
             placeholder: 'Client ID',
+			suggestEnvVars: true,
             value: oauthsettings['client_id'] ?? ""})
         }}
-        {{ forms.textField({
+        {{ forms.autosuggestField({
             label: 'Client Secret',
             instructions: '',
             id: 'client_secret',
             name: 'client_secret',
             placeholder: 'Client Secret',
+            suggestEnvVars: true,
             value: oauthsettings['client_secret'] ?? ""})
         }}
         {{ forms.textField({
